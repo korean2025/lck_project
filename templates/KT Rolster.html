@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KT Rolster</title>
+  <style>
+    body {
+      
+  background-color: #1c1c1c;
+  color: white;
+  font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+  padding: 30px;
+  padding-right: 350px;
+  background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+  background-size: 22px 22px;
+  animation: fadeInBody 0.8s ease-in-out;
+}
+
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .player-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .player-card {
+      background-color: #1e1e1e;
+      width: 250px;
+      border-radius: 15px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .player-card img {
+      width: 100%;
+      height: 310px;
+      object-fit: cover;
+    }
+    .player-card:hover {
+  transform: translateY(-8px); /* 살짝 위로 떠오름 */
+  box-shadow: 0 8px 25px rgba(255, 235, 59, 0.4); /* 노란빛 그림자 효과 */
+}
+
+
+    .player-info {
+      padding: 15px;
+    }
+
+    .player-info h3 {
+      margin: 10px 0 5px;
+      font-size: 20px;
+      color: red;
+    }
+    .player-info h4 {
+      margin: 10px 0 5px;
+      font-size: 15px;
+      color: rgb(0, 255, 55);
+    }
+    hr {
+    background-color: red; 
+    height: 3px; /* 두께 설정 */
+    border: none;
+    }
+
+    .player-info p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .champions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .champion {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 70px;
+    }
+
+    .champion img {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+      object-fit: cover;
+    }
+    .team-name {
+        font-size: 48px;
+        font-weight: bold;
+        color: #f1c40f;
+        margin-bottom: 40px;
+        text-align: center;    
+        }
+        .team-name img {
+  display: block;
+  margin: 0 auto;
+  animation: floatLogo 2.5s ease-in-out infinite; /* 둥실둥실 애니메이션 */
+}
+@keyframes floatLogo {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+
+    .champion span {
+      font-size: 13px;
+      color: #ddd;
+    }
+    ul > li {
+            display: inline-block;
+            margin-right: 2em;
+            text-align: left;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      background-color: #1e1e1e;
+      padding: 20px 0;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      animation: fadeInNav 1s ease-in-out;
+    }
+
+    @keyframes fadeInNav {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    nav a {
+      color: #f1c40f;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      text-shadow: 0 0 10px #f1c40f;
+    }
+.side-nav {
+      position: fixed;
+      left: 20px;
+      transform: translateY(15%);
+      width: 70px;
+      padding: 15px 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(241, 196, 15, 0.2);
+      border-radius: 30px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      z-index: 1000;
+      animation: fadeInSideNav 1.5s ease-in-out;
+    }
+
+    @keyframes fadeInSideNav {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .side-nav a {
+      position: relative;
+      display: block;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      overflow: visible;
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .side-nav a:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+    }
+
+    .side-nav img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .tooltip {
+      position: absolute;
+      left: 60px;
+      top: 50%;
+      transform: translateY(-50%) scale(0.8);
+      background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+      color: #ffeb3b;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 0 0 transparent;
+      transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+      z-index: 999;
+    }
+
+    .side-nav a:hover .tooltip {
+      opacity: 1;
+      transform: translateY(-50%) translateX(8px) scale(1);
+      box-shadow: 0 0 10px rgba(255, 235, 59, 0.6), 0 0 20px rgba(255, 235, 59, 0.2);
+    }
+    .winrate-banner {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 32px;
+      font-weight: bold;
+      color: #f1c40f;
+      text-shadow: 0 0 6px rgba(255, 235, 59, 0.2);
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+/* 채팅창 스타일 */
+#chat-container {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: linear-gradient(to bottom, #1e1e1e, #121212);
+  border-left: 1px solid rgba(255, 235, 59, 0.1);
+  box-shadow: -4px 0 20px rgba(255, 235, 59, 0.15);
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+  z-index: 1000;
+  animation: slideInRight 0.7s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+#chat-container h2 {
+  color: #f1c40f;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 20px;
+  text-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+}
+
+#chatArea {
+  flex-grow: 1;
+  border: 1px solid #444;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #1c1c1c;
+  margin-bottom: 10px;
+  color: #ddd;
+  font-size: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 5px rgba(255, 235, 59, 0.05);
+}
+
+#chatArea p {
+  margin: 6px 0;
+}
+
+#chatArea p strong {
+  color: #f1c40f;
+}
+
+#usernameInput,
+#messageInput {
+  padding: 10px;
+  border: 1px solid #444;
+  background-color: #1c1c1c;
+  color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+#usernameInput {
+  width: 60px;
+  padding: 6px 8px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+#messageInput {
+  width: calc(100% - 130px); /* username + 버튼 공간 고려 */
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+#usernameInput:focus,
+#messageInput:focus {
+  border-color: #f1c40f;
+  outline: none;
+  box-shadow: 0 0 8px rgba(255, 235, 59, 0.2);
+}
+
+#sendButton {
+  width: 60px;
+  padding: 8px 0;
+  font-size: 13px;
+  background: linear-gradient(135deg, #f1c40f, #ffeb3b);
+  color: black;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+}
+
+#sendButton:hover {
+  background: linear-gradient(135deg, #fff176, #fbc02d);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(255, 235, 59, 0.6);
+}
+.me-message {
+  background-color: #f1c40f;
+  color: #000;
+  align-self: flex-end;
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
+  margin: 6px 0;
+  position: relative;
+  word-break: break-word;
+}
+
+.me-message::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid #f1c40f;
+}
+
+.other-message {
+  background-color: #2c2c2c;
+  color: #f0f0f0;
+  align-self: flex-start;
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  margin: 6px 0;
+  position: relative;
+  word-break: break-word;
+}
+
+.other-message::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid #2c2c2c;
+}
+.winrate-banner {
+  text-align: center;
+  margin-top: 60px;
+  font-size: 36px;
+  font-weight: bold;
+  color: #f1c40f;
+  text-shadow: 0 0 10px rgba(255, 235, 59, 0.4);
+  animation: fadeInWinRate 1.5s ease-in-out;
+}
+
+@keyframes fadeInWinRate {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.glow-text {
+  display: inline-block;
+  color: #f1c40f;
+  text-shadow: 0 0 10px #f1c40f, 0 0 20px #fbc02d;
+}
+
+.highlight-number {
+  font-size: 64px;
+  font-weight: 900;
+  color: #fff176;
+  text-shadow: 0 0 20px #fff59d, 0 0 30px #fdd835;
+  animation: pulseWin 2s infinite;
+}
+
+@keyframes pulseWin {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 20px #fff59d;
+  }
+  50% {
+    transform: scale(1.1);
+    text-shadow: 0 0 40px #fff176;
+  }
+}
+.jackpot-number {
+  font-size: 64px;
+  font-weight: 900;
+  color: #ffec3d;
+  display: inline-block;
+  text-shadow:
+    0 0 5px #fff176,
+    0 0 10px #fdd835,
+    0 0 20px #fbc02d;
+  animation: jackpotSpin 1s ease-in-out infinite;
+  transition: transform 0.4s ease-in-out;
+}
+
+@keyframes jackpotSpin {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  25%  { transform: translateY(-10px) scale(1.1); opacity: 0.9; }
+  50%  { transform: translateY(5px) scale(0.95); opacity: 0.8; }
+  75%  { transform: translateY(-3px) scale(1.05); opacity: 0.95; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.jackpot-final {
+  animation: none;
+  color: #ffffff;
+  font-size: 80px;
+  transform: scale(1.5);
+  text-shadow:
+    0 0 20px #ffe600,
+    0 0 40px #ffff00,
+    0 0 80px #ffeb3b;
+  transition: all 0.3s ease-in-out;
+}
+  </style>
+</head>
+<body>
+ <nav>
+  <a href="/">홈</a>
+  <a href="/player_comparison">선수비교</a>
+  <a href="/Simulator">시뮬레이터</a>
+  <a href="/board">게시판</a>
+  <a href="https://esports.op.gg/?hl=ko_KR" target="_blank">Esports.op.gg</a>
+  <a href="https://www.fow.lol/" target="_blank">FOW.KR</a>
+</nav>
+<div class="side-nav">
+  <a href="/bnk_fearx" >
+    <img src="static/images/BNK FEARX.png" alt="BNK FEARX" />
+  <span class="tooltip">BNK FEARX</span></a>
+
+  <a href="/dn_freecs" >
+    <img src="static/images/DN freecs.png" alt="DN freecs" />
+  <span class="tooltip">DN freecs</span></a>
+
+  <a href="/dplus_kia" >
+    <img src="static/images/Dplus KIA.png" alt="Dplus KIA" />
+  <span class="tooltip">Dplus KIA</span></a>
+
+  <a href="/hanwha_life_esports" >
+    <img src="static/images/Hanwha Life Esports.png" alt="Hanwha Life Esports" />
+  <span class="tooltip">Hanwha Life Esports</span></a>
+
+  <a href="/gen_g" >
+    <img src="static/images/Gen.G.png" alt="Gen.G" />
+  <span class="tooltip">Gen.G</span></a>
+
+  <a href="/drx" >
+    <img src="static/images/DRX.png" alt="DRX" />
+  <span class="tooltip">DRX</span></a>
+
+  <a href="/kt_rolster" >
+    <img src="static/images/kt rolster.png" alt="kt rolster" />
+  <span class="tooltip">KT Rolster</span></a>
+
+  <a href="/oksavingsbank_brion" >
+    <img src="static/images/OKSavingsBank BRION.png" alt="BRION" />
+  <span class="tooltip">BRION</span></a>
+
+  <a href="/nongshim_redforce" >
+    <img src="static/images/Nongshim RedForce.png" alt="Nongshim RedForce" />
+  <span class="tooltip">Nongshim RedForce</span></a>
+
+  <a href="/T1" >
+    <img src="static/images/T1.png" alt="T1" />
+  <span class="tooltip">T1</span></a>
+</div>
+
+  <div class="team-name">
+    <img src="static/images/kt rolster.png" alt="team_name" width="200"/></div>
+
+    <div class="winrate-banner">
+  <span class="glow-text">이 팀의 승리 확률은</span>
+  <span id="winRate" class="highlight-number">0</span><span class="glow-text">%</span>
+</div>
+<br>
+<br>
+
+  <div class="player-container">
+    <!-- TOP -->
+    <div class="player-card">
+      <img src="static/player/PerfecT.png" alt="TOP 선수 이미지" />
+      <div class="player-info">
+        <h3>PerfecT</h3>
+        <p>Position: TOP</p>
+        <p>PlayGame : 103</p>
+        <p>Kill Rate : 50.6%</p>
+        <p>K/D/A: 2.2 / 2.4 / 5.2</p>
+        <p>KDA : 3.0 </p>
+        <hr>
+        <h4>Champion pick</h4>
+        <hr>
+        <div class="champions">
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/KSante.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>크산테</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Rumble.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>럼블</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Renekton.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>레넥톤</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUG -->
+    <div class="player-card">
+      <img src="static/player/Cuzz.png" alt="JUG 선수 이미지" />
+      <div class="player-info">
+        <h3>Cuzz</h3>
+        <p>Position: JUG</p>
+        <p>PlayGame : 634</p>
+        <p>Kill rate : 69.4%</p>
+        <p>K/D/A: 2.2 / 2.1 / 6.4</p>
+        <p>KDA : 4.0</p>
+        <hr>
+        <h4>Champion pick</h4>
+        <hr>
+        <div class="champions">
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Nidalee.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>니달리</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Maokai.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>마오카이</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Zyra.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>자이라</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MID -->
+    <div class="player-card">
+      <img src="static/player/Bdd.png" alt="MID 선수 이미지" />
+      <div class="player-info">
+        <h3>Bdd</h3>
+        <p>Position : MID</p>
+        <p>PlayGame : 883</p>
+        <p>Kill rate : 69.0%</p>
+        <p>K/D/A: 3.2 / 1.8 / 5.4</p>
+        <p>KDA : 4.7</p>
+        <hr>
+        <h4>Champion pick</h4>
+        <hr>
+        <div class="champions">
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Azir.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>아지르</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Corki.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>코르키</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Lucian.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>루시안</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT -->
+    <div class="player-card">
+      <img src="static/player/deokdam.png" alt="BOT 선수 이미지" />
+      <div class="player-info">
+        <h3>Deokdam</h3>
+        <p>Position : BOT</p>
+        <p>PlayGame : 322</p>
+        <p>Kill rate : 65.7%</p>
+        <p>K/D/A: 3.6 / 2.0 / 4.3</p>
+        <p>KDA : 4.0</p>
+        <hr>
+        <h4>Champion pick</h4>
+        <hr>
+        <div class="champions">
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Aphelios.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>아펠리오스</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Ezreal.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>이즈리얼</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Zeri.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>제리</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUP -->
+    <div class="player-card">
+      <img src="static/player/Peter.png" alt="SUP 선수 이미지" />
+      <div class="player-info">
+        <h3>Peter</h3>
+        <p>Position : SUP</p>
+        <p>PlayGame : 1574</p>
+        <p>Kill rate : 73.3</p>
+        <p>K/D/A: 0.6 / 2.4 / 6.7</p>
+        <p>KDA : 3.1</p>
+        <hr>
+        <h4>Champion pick</h4>
+        <hr>
+        <div class="champions">
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Yuumi.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>유미</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Nautilus.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>노틸러스</span></div>
+          <div class="champion"><img src="https://opgg-static.akamaized.net/meta/images/lol/15.11.1/champion/Rakan.png?image=c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1511"><span>라칸</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const teamName = document.title.trim();
+
+  fetch('/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ team: teamName })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById("winRate").textContent = "예측 불가";
+        return;
+      }
+
+      const finalRate = parseFloat(data.win_rate); // 예: 63.2
+      animateRoulette(finalRate);
+    })
+    .catch(error => {
+      console.error("API 요청 오류:", error);
+      document.getElementById("winRate").textContent = "예측 불가";
+    });
+});
+
+</script>
+<script>
+function animateRoulette(target) {
+  const winRateElement = document.getElementById("winRate");
+  let current = 0;
+  let steps = 0;
+  let interval = 10;
+  const maxSteps = 50;
+
+  winRateElement.classList.remove("jackpot-final");
+  winRateElement.classList.add("jackpot-number");
+
+  function spinStep() {
+    if (steps >= maxSteps) {
+      winRateElement.textContent = target;
+      winRateElement.classList.remove("jackpot-number");
+      winRateElement.classList.add("jackpot-final");
+      return;
+    }
+
+    current = Math.floor(Math.random() * 100);
+    winRateElement.textContent = current;
+    steps++;
+
+    // 점점 느려짐: 초반엔 30ms, 후반엔 최대 200ms까지 증가
+    let delay = interval + steps * 1;
+
+    setTimeout(spinStep, delay);
+  }
+
+  spinStep();
+}
+
+
+</script>
+
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const team = urlParams.get('team');
+    if (team) {
+      document.getElementById('teamName').textContent = `${team} 선수 정보 및 분석`;
+    } else {
+      // teamName div가 team-name 클래스만 가지고 있어서 id='teamName'으로 변경했습니다.
+      // 원본 코드에는 teamName id가 없었으므로 이 부분을 적용하려면 팀명 div에 id="teamName"을 추가해야 합니다.
+      // 현재 T1.html의 team-name div는 이미지로만 이루어져 있으므로, 이 스크립트가 의미 있게 작동하려면 텍스트를 표시할 요소가 필요합니다.
+      // 예시: <div class="team-name" id="teamName"> <img ... /> </div>
+      // 또는: <h1 id="teamName" class="team-name">팀 선수 정보 및 분석</h1>
+    }
+  </script>
+
+<div id="chat-container">
+    <h2>실시간 채팅</h2>
+    <div id="chatArea"></div>
+    <div style="display: flex; margin-top: auto;">
+        <input type="text" id="usernameInput" placeholder="이름" style="width: 80px; margin-right: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="text" id="messageInput" placeholder="여기에 메시지를 입력하세요...">
+        <button id="sendButton">보내기</button>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+
+<script type="text/javascript">
+    // 1. 필요한 것들을 컴퓨터에게 알려줘요.
+    const chatArea = document.getElementById('chatArea');          // 채팅 내용이 보이는 곳
+    const usernameInput = document.getElementById('usernameInput'); // 사용자 이름 입력하는 곳
+    const messageInput = document.getElementById('messageInput'); // 메시지 입력하는 곳
+    const sendButton = document.getElementById('sendButton');     // 보내기 버튼
+
+    // --- 추가된 부분: 로컬 스토리지 관련 함수 ---
+    // 로컬 스토리지에 이름 저장
+    function saveUsername(username) {
+        localStorage.setItem('chatUsername', username);
+    }
+
+    // 로컬 스토리지에서 이름 불러오기
+    function loadUsername() {
+        return localStorage.getItem('chatUsername');
+    }
+
+    // 로컬 스토리지에 채팅 메시지 저장
+    function saveChatMessages(messages) {
+        try {
+            localStorage.setItem('chatHistory', JSON.stringify(messages));
+            // 스크롤 위치 저장 (선택 사항)
+            localStorage.setItem('chatScrollTop', chatArea.scrollTop);
+        } catch (e) {
+            console.error("채팅 기록 저장 실패:", e);
+        }
+    }
+
+    // 로컬 스토리지에서 채팅 메시지 불러오기
+    function loadChatMessages() {
+        try {
+            const history = localStorage.getItem('chatHistory');
+            return history ? JSON.parse(history) : [];
+        } catch (e) {
+            console.error("채팅 기록 불러오기 실패:", e);
+            return [];
+        }
+    }
+
+    // 로컬 스토리지에서 스크롤 위치 불러오기
+    function loadChatScrollTop() {
+        const scrollTop = localStorage.getItem('chatScrollTop');
+        return scrollTop ? parseInt(scrollTop, 10) : null;
+    }
+    // --- 추가된 부분 끝 ---
+
+    // 2. 서버에 연결할 Socket.IO를 만들어요.
+    // 현재 페이지의 도메인과 포트로 자동 연결됩니다.
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // --- 추가된 부분: 페이지 로드 시 초기화 ---
+    window.onload = function() {
+        // 1. 저장된 사용자 이름 불러와서 input에 채우기
+        const savedName = loadUsername();
+        if (savedName) {
+            usernameInput.value = savedName;
+        } else {
+            // 처음 방문 시 또는 저장된 이름이 없을 시 '익명'을 기본값으로
+            usernameInput.value = '익명';
+        }
+
+        // 2. 저장된 채팅 메시지 불러와서 chatArea에 표시
+        const savedMessages = loadChatMessages();
+        savedMessages.forEach(msg => {
+            // 메시지 객체는 { username: '이름', message: '내용' } 형태여야 함
+            const p = document.createElement('p');
+            if (msg.username === usernameInput.value.trim()) {
+                p.classList.add('me-message');
+            } else {
+                p.classList.add('other-message');
+            }
+            p.textContent = (msg.username ? msg.username + ': ' : '') + msg.message;
+            chatArea.appendChild(p);
+        });
+
+        // 3. 저장된 스크롤 위치로 이동 (없으면 가장 아래로)
+        const savedScrollTop = loadChatScrollTop();
+        if (savedScrollTop !== null) {
+            chatArea.scrollTop = savedScrollTop;
+        } else {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    };
+    // --- 추가된 부분 끝 ---
+
+
+    // 3. 서버와 연결이 잘 되었을 때 (Socket.IO 'connect' 이벤트)
+    socket.on('connect', function() {
+        console.log('서버랑 연결되었어요! 이제 채팅할 수 있어요.');
+        // 'status' 이벤트는 서버에서 보낼 때만 받습니다.
+        // chatArea.innerHTML += '<p class="status-message"><strong>[알림] 서버에 연결되었습니다.</strong></p>';
+    });
+
+    // 4. 서버로부터 메시지가 도착했을 때 (Socket.IO 'message' 이벤트)
+    socket.on('message', function(data) {
+        const p = document.createElement('p');
+
+        // 사용자 이름 가져오기
+        const myName = usernameInput.value.trim();
+
+        // 내 메시지인지 확인해서 스타일 다르게 적용
+        if (data.username === myName) {
+            p.classList.add('me-message');
+        } else {
+            p.classList.add('other-message');
+        }
+
+        // 메시지 내용 설정
+        p.textContent = (data.username ? data.username + ': ' : '') + data.message;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        // --- 추가된 부분: 받은 메시지 로컬 스토리지에 저장 ---
+        let currentMessages = loadChatMessages();
+        currentMessages.push({ username: data.username, message: data.message });
+        saveChatMessages(currentMessages);
+        // --- 추가된 부분 끝 ---
+    });
+
+
+    // 5. 서버로부터 상태 메시지가 도착했을 때 (Socket.IO 'status' 이벤트)
+    socket.on('status', function(data) {
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = data.msg;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 6. 서버와 연결이 끊겼을 때 (Socket.IO 'disconnect' 이벤트)
+    socket.on('disconnect', function() {
+        console.log('서버랑 연결이 끊겼어요.');
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[알림] 서버와 연결이 끊겼습니다.';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        // --- 추가된 부분: 연결이 끊겼을 때 재연결 시도 ---
+        console.log("3초 후 Socket.IO 재연결 시도...");
+        setTimeout(() => {
+            // io.connect를 다시 호출하면 Socket.IO가 재연결을 시도합니다.
+            // 이미 socket 객체가 있으므로 socket.connect()를 사용할 수도 있습니다.
+            socket.connect();
+        }, 3000);
+        // --- 추가된 부분 끝 ---
+    });
+
+    // 7. 문제가 생겼을 때 (Socket.IO 'error' 이벤트 - 잘 발생하진 않음)
+    socket.on('error', function(err) {
+        console.error('웹소켓 오류 발생:', err);
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[오류] 문제가 발생했습니다!';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 8. 메시지 보내기 버튼을 눌렀을 때
+    sendButton.onclick = function() {
+        sendMessage();
+    };
+
+    // 9. 메시지 입력 칸에서 엔터 키를 눌렀을 때
+    messageInput.onkeypress = function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
+    // 10. 메시지를 실제로 보내는 함수
+    function sendMessage() {
+        const username = usernameInput.value.trim(); // 사용자 이름 가져오기
+        const message = messageInput.value.trim();  // 입력 칸에 있는 메시지를 가져와요.
+
+        if (username === '') {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+
+        if (message !== '') { // 메시지가 비어있지 않다면
+            // Socket.IO는 emit을 사용하여 이벤트를 보냅니다.
+            // 서버의 'message' 핸들러로 'message' 이벤트와 함께 데이터를 보냅니다.
+            socket.emit('message', { username: username, message: message });
+            messageInput.value = ''; // 메시지를 보낸 후 입력 칸을 비워요.
+
+            // --- 추가된 부분: 보낸 메시지 로컬 스토리지에 저장 ---
+            // 서버로부터 메시지를 다시 받아 화면에 그리는 방식이라면 이 부분은 생략 가능
+            // 하지만 즉각적인 사용자 피드백을 위해 클라이언트에서 먼저 추가하는 것이 일반적
+            let currentMessages = loadChatMessages();
+            currentMessages.push({ username: username, message: message });
+            saveChatMessages(currentMessages);
+            // --- 추가된 부분 끝 ---
+
+            // --- 추가된 부분: 이름도 로컬 스토리지에 저장 ---
+            saveUsername(username);
+            // --- 추가된 부분 끝 ---
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player comparison</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body {
+    background-color: #1c1c1c;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 30px;
+    text-align: center;
+    background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+    background-size: 22px 22px;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  header {
+    font-size: 48px;
+    font-weight: bold;
+    color: #f1c40f;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 235, 59, 0.3);
+  }
+
+  select {
+    margin-bottom: 30px;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 6px;
+    background-color: #2c2c2c;
+    color: white;
+    border: none;
+  }
+
+  select:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+    border: 1px solid #f1c40f;
+  }
+
+  #compareTitle {
+    font-size: 26px;
+    margin: 20px 0;
+  }
+
+  canvas {
+  width: 100% !important;
+  max-width: 800px;
+  margin: 0 auto 30px;
+  display: block;
+  background-color: #2c2c2c;
+  border-radius: 10px;
+  padding: 20px;
+  transition: box-shadow 0.3s ease-in-out;
+  box-shadow: 0 0 20px rgba(241, 196, 15, 0.3); /* 노란 glow 추가 */
+}
+
+canvas:hover {
+  box-shadow: 0 0 30px rgba(241, 196, 15, 0.5); /* 호버 시 glow 강화 */
+}
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    margin-bottom: 30px;
+  }
+
+  th, td {
+    padding: 12px 16px;
+    text-align: center;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  th {
+    background-color: #2c2c2c;
+    color: #f1c40f;
+  }
+
+  td {
+    color: #ccc;
+    cursor: pointer;
+  }
+
+  tr:hover {
+    background-color: #2a2a2a;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+
+  tr.selected {
+    background-color: #34495e !important;
+  }
+
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    background-color: #1e1e1e;
+    padding: 20px 0;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  nav a {
+    color: #f1c40f;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+
+  nav a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 10px #f1c40f;
+  }
+
+  .side-nav {
+    position: fixed;
+    left: 20px;
+    transform: translateY(15%);
+    width: 70px;
+    padding: 15px 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(241, 196, 15, 0.2);
+    border-radius: 30px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 1000;
+  }
+
+  .side-nav a {
+    position: relative;
+    display: block;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: visible;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .side-nav a:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+  }
+
+  .side-nav img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .tooltip {
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.8);
+    background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+    color: #ffeb3b;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 0 0 transparent;
+    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+    z-index: 999;
+  }
+
+  .side-nav a:hover .tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(8px) scale(1);
+    box-shadow: 0 0 10px rgba(255, 235, 59, 0.6), 0 0 20px rgba(255, 235, 59, 0.2);
+  }
+
+  #chat-container {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: linear-gradient(to bottom, #1e1e1e, #121212);
+    border-left: 1px solid rgba(255, 235, 59, 0.1);
+    box-shadow: -4px 0 20px rgba(255, 235, 59, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    box-sizing: border-box;
+    z-index: 1000;
+    animation: slideInRight 0.7s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  #chat-container h2 {
+    color: #f1c40f;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 20px;
+    text-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+  }
+
+  #chatArea {
+    flex-grow: 1;
+    border: 1px solid #444;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #1c1c1c;
+    margin-bottom: 10px;
+    color: #ddd;
+    font-size: 14px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 5px rgba(255, 235, 59, 0.05);
+  }
+
+  #chatArea p {
+    margin: 6px 0;
+  }
+
+  #chatArea p strong {
+    color: #f1c40f;
+  }
+
+  #usernameInput,
+  #messageInput {
+    padding: 10px;
+    border: 1px solid #444;
+    background-color: #1c1c1c;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #usernameInput {
+    width: 60px;
+    padding: 6px 8px;
+    font-size: 12px;
+    margin-right: 4px;
+  }
+
+  #messageInput {
+    width: calc(100% - 130px);
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  #usernameInput:focus,
+  #messageInput:focus {
+    border-color: #f1c40f;
+    outline: none;
+    box-shadow: 0 0 8px rgba(255, 235, 59, 0.2);
+  }
+
+#sendButton {
+  width: 60px;
+  padding: 8px 0;
+  font-size: 13px;
+  background: linear-gradient(135deg, #f1c40f, #ffeb3b);
+  color: black;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* 마우스 오버 시 */
+#sendButton:hover {
+  background: linear-gradient(135deg, #fff176, #fbc02d);
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(255, 235, 59, 0.6);
+}
+
+/* 클릭 시 */
+#sendButton:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 6px rgba(255, 235, 59, 0.3);
+}
+
+  .me-message {
+    background-color: #f1c40f;
+    color: #000;
+    align-self: flex-end;
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 18px 18px 4px 18px;
+    margin: 6px 0;
+    position: relative;
+    word-break: break-word;
+  }
+
+  .me-message::after {
+    content: "";
+    position: absolute;
+    right: -8px;
+    top: 12px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 8px solid #f1c40f;
+  }
+
+  .other-message {
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    align-self: flex-start;
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 18px 18px 18px 4px;
+    margin: 6px 0;
+    position: relative;
+    word-break: break-word;
+  }
+
+  .other-message::after {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 12px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 8px solid #2c2c2c;
+  }
+  #sendButton {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#sendButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 235, 59, 0.6);
+}
+
+</style>
+
+</head>
+<body>
+   <nav>
+  <a href="/">홈</a>
+  <a href="/player_comparison">선수비교</a>
+  <a href="/Simulator">시뮬레이터</a>
+  <a href="/board">게시판</a>
+  <a href="https://esports.op.gg/?hl=ko_KR" target="_blank">Esports.op.gg</a>
+  <a href="https://www.fow.lol/" target="_blank">FOW.KR</a>
+</nav>
+<div class="side-nav">
+  <a href="/bnk_fearx" >
+    <img src="static/images/BNK FEARX.png" alt="BNK FEARX" />
+  <span class="tooltip">BNK FEARX</span></a>
+
+  <a href="/dn_freecs" >
+    <img src="static/images/DN freecs.png" alt="DN freecs" />
+  <span class="tooltip">DN freecs</span></a>
+
+  <a href="/dplus_kia" >
+    <img src="static/images/Dplus KIA.png" alt="Dplus KIA" />
+  <span class="tooltip">Dplus KIA</span></a>
+
+  <a href="/hanwha_life_esports" >
+    <img src="static/images/Hanwha Life Esports.png" alt="Hanwha Life Esports" />
+  <span class="tooltip">Hanwha Life Esports</span></a>
+
+  <a href="/gen_g" >
+    <img src="static/images/Gen.G.png" alt="Gen.G" />
+  <span class="tooltip">Gen.G</span></a>
+
+  <a href="/drx" >
+    <img src="static/images/DRX.png" alt="DRX" />
+  <span class="tooltip">DRX</span></a>
+
+  <a href="/kt_rolster" >
+    <img src="static/images/kt rolster.png" alt="kt rolster" />
+  <span class="tooltip">KT Rolster</span></a>
+
+  <a href="/oksavingsbank_brion" >
+    <img src="static/images/OKSavingsBank BRION.png" alt="BRION" />
+  <span class="tooltip">BRION</span></a>
+
+  <a href="/nongshim_redforce" >
+    <img src="static/images/Nongshim RedForce.png" alt="Nongshim RedForce" />
+  <span class="tooltip">Nongshim RedForce</span></a>
+
+  <a href="/T1" >
+    <img src="static/images/T1.png" alt="T1" />
+  <span class="tooltip">T1</span></a>
+</div>
+<div id="loader" class="spinner"></div>
+  <header>LCK 선수 비교</header>
+
+  <select id="positionFilter" onchange="changePosition()">
+    <option value="탑">TOP</option>
+    <option value="정글">JUG</option>
+    <option value="미드">MID</option>
+    <option value="원딜">BOT</option>
+    <option value="서폿">SUP</option>
+  </select>
+
+  <h2 id="compareTitle">선수명을 선택하세요</h2>
+  <canvas id="kdaChart"></canvas>
+
+  <div id="tables"></div>
+
+  <script>
+    const positions = {
+      '탑': [
+  { name: 'Soboro', team: 'BNK FEARX', kills: 2.1, deaths: 2.5, assists: 3.2, games: 16 },
+  { name: 'DuDu', team: 'DN freecs', kills: 2.3, deaths: 2.7, assists: 3.5, games: 312 },
+  { name: 'Siwoo', team: 'Dplus KIA', kills: 2.0, deaths: 2.7, assists: 3.0, games: 16 },
+  { name: 'Rich', team: 'DRX', kills: 2.4, deaths: 3.2, assists: 5.0, games: 173 },
+  { name: 'Kiin', team: 'Gen.G', kills: 2.4, deaths: 2.2, assists: 4.7, games: 816 },
+  { name: 'Zeus', team: 'Hanwha', kills: 2.9, deaths: 2.5, assists: 5, games: 491 },
+  { name: 'PerfecT', team: 'KT', kills: 2.2, deaths: 2.4, assists: 2.5, games: 103 },
+  { name: 'Kingen', team: 'Nongshim', kills: 2.0, deaths: 2.4, assists: 4.6, games: 469 },
+  { name: 'Morgan', team: 'BRION', kills: 2.0, deaths: 2.5, assists: 3.9, games: 347 },
+  { name: 'DORAN', team: 'T1', kills: 2.5, deaths: 2.5, assists: 5.4, games: 523 }
+      ],
+      '정글': [
+  { name: 'Raptor', team: 'BNK FEARX', kills: 2.4, deaths: 2.7, assists: 6.6, games: 50 },
+  { name: 'Pyosik', team: 'DN freecs', kills: 2.5, deaths: 2.5, assists: 6.1, games: 382 },
+  { name: 'Lucid', team: 'Dplus KIA', kills: 2, deaths: 2.4, assists: 8.5, games: 111 },
+  { name: 'Sponge', team: 'DRX', kills: 1.5, deaths: 3.3, assists: 4.6, games: 84 },
+  { name: 'Canyon', team: 'Gen.G', kills: 2.6, deaths: 2.1, assists: 7.2, games: 739 },
+  { name: 'Peanut', team: 'Hanwha', kills: 2.6, deaths: 2.0, assists: 6.6, games: 930},
+  { name: 'Cuzz', team: 'KT', kills: 2.2, deaths: 2.1, assists: 6.4, games: 634 },
+  { name: 'GIDEON', team: 'Nongshim', kills: 1.7, deaths: 2.6, assists: 5.0, games: 70 },
+  { name: 'Ellim', team: 'BRION', kills: 2.0, deaths: 2.4, assists: 5.9, games: 137 },
+  { name: 'ONER', team: 'T1', kills: 2.8, deaths: 2.3, assists: 6.6, games: 366 }
+      ],
+      '미드': [
+  { name: 'VicLa', team: 'BNK FEARX', kills: 2.7, deaths: 2.5, assists: 6.3, games: 63 },
+  { name: 'BuLLDoG', team: 'DN freecs', kills: 2.4, deaths: 2.5, assists: 4.2, games: 173 },
+  { name: 'ShowMaker', team: 'Dplus KIA', kills: 3.4, deaths: 1.7, assists: 5.7, games: 757 },
+  { name: 'kyeahoo', team: 'DRX', kills: 2.0, deaths: 2.3, assists: 4.1, games: 58 },
+  { name: 'Chovy', team: 'Gen.G', kills: 3.5, deaths: 1.6, assists: 5.4, games: 798 },
+  { name: 'Zeka', team: 'Hanwha', kills: 3.6, deaths: 1.9, assists: 4.9, games: 369 },
+  { name: 'Bdd', team: 'KT', kills: 3.2, deaths: 1.8, assists: 5.4, games: 883 },
+  { name: 'Calix', team: 'Nongshim', kills: 1.6, deaths: 2.8, assists: 3.1, games: 23 },
+  { name: 'Clozer', team: 'BRION', kills: 2.7, deaths: 2.4, assists: 4.7, games: 312 },
+  { name: 'Faker', team: 'T1', kills: 3.4, deaths: 2.1, assists: 5.4, games: 1008 }
+      ],
+      '원딜': [
+  { name: 'Diable', team: 'BNK FEARX', kills: 3.2, deaths: 2.5, assists: 3.8, games: 16 },
+  { name: 'Berserker', team: 'DN freecs', kills: 4.0, deaths: 2.3, assists: 4.1, games: 18 },
+  { name: 'Aiming', team: 'Dplus KIA', kills: 4.2, deaths: 1.6, assists: 4.4, games: 270 },
+  { name: 'Teddy', team: 'DRX', kills: 3.5, deaths: 1.7, assists: 4.3, games: 654 },
+  { name: 'Ruler', team: 'Gen.G', kills: 3.7, deaths: 1.6, assists: 4.4, games: 772 },
+  { name: 'Viper', team: 'Hanwha', kills: 3.7, deaths: 1.5, assists: 5.5, games: 312 },
+  { name: 'deokdam', team: 'KT', kills: 3.6, deaths: 2.0, assists: 4.3, games: 322 },
+  { name: 'Jiwoo', team: 'Nongshim', kills: 3.4, deaths: 2.7, assists: 3.7, games: 120 },
+  { name: 'Hype', team: 'BRION', kills: 3.3, deaths: 2.4, assists: 4.1, games: 16 },
+  { name: 'GUMAYUSI', team: 'T1', kills: 3.9, deaths: 1.9, assists: 5.1, games: 375 }
+      ],
+      '서폿': [
+  { name: 'Kellin', team: 'Dplus', kills: 0.6, deaths: 2.4, assists: 7.9, games: 426 },
+  { name: 'Life', team: 'Hanwha', kills: 0.7, deaths: 2.4, assists: 7.5, games: 525 },
+  { name: 'BeryL', team: 'Dplus KIA', kills: 0.9, deaths: 2.9, assists: 7.9, games: 543 },
+  { name: 'Andil', team: 'DRX', kills: 0.5, deaths: 3.7, assists: 7.1, games: 96 },
+  { name: 'Duro', team: 'Gen.G', kills: 0.4, deaths: 3.2, assists: 7.6, games: 37 },
+  { name: 'Delight', team: 'Hanwha', kills: 0.7, deaths: 2.4, assists: 8.5, games: 429 },
+  { name: 'Peter', team: 'KT', kills: 0.6, deaths: 2.4, assists: 6.7, games: 1574 },
+  { name: 'Lehends', team: 'Nongshim', kills: 0.7, deaths: 2.3, assists: 8.2, games: 743 },
+  { name: 'Pollu', team: 'BRION', kills: 0.6, deaths: 3.8, assists: 6.6, games: 68 },
+  { name: 'KERIA', team: 'T1', kills: 0.8, deaths: 2.3, assists: 8.6, games: 543 }
+      ]
+    };
+
+    const playerStats = {};
+    const tablesDiv = document.getElementById('tables');
+
+    for (const [position, players] of Object.entries(positions)) {
+      const section = document.createElement('section');
+      section.classList.add('position-section');
+      section.dataset.position = position;
+
+      section.innerHTML = `
+        <h2>${position}</h2>
+        <table><thead><tr>
+          <th>선수명</th><th>팀</th><th>KDA</th><th>킬</th><th>데스</th><th>어시</th><th>경기 수</th>
+        </tr></thead><tbody></tbody></table>
+      `;
+
+      const tbody = section.querySelector('tbody');
+      players.forEach(player => {
+        const kda = ((player.kills + player.assists) / Math.max(1, player.deaths)).toFixed(2);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${player.name}</td>
+          <td>${player.team}</td>
+          <td>${kda}</td>
+          <td>${player.kills}</td>
+          <td>${player.deaths}</td>
+          <td>${player.assists}</td>
+          <td>${player.games}</td>
+        `;
+        row.addEventListener('click', () => toggleSelection(row, player.name));
+        tbody.appendChild(row);
+        playerStats[player.name] = player;
+      });
+
+      tablesDiv.appendChild(section);
+    }
+
+function changePosition() {
+  const selected = document.getElementById('positionFilter').value;
+
+  // ✅ 차트 캔버스를 투명하게 만들고 scale 줄이기 (부드러운 사라짐 효과)
+  const canvas = document.getElementById('kdaChart');
+  canvas.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  canvas.style.opacity = '0';
+  canvas.style.transform = 'scale(0.95)';
+
+  // ✅ 약간 딜레이 후 실제 내용 변경
+  setTimeout(() => {
+    // 선택 초기화
+    document.querySelectorAll('tr.selected').forEach(row => row.classList.remove('selected'));
+
+    // 테이블 표시 조정
+    document.querySelectorAll('.position-section').forEach(section => {
+      section.style.display = section.dataset.position === selected ? 'block' : 'none';
+    });
+
+    // 차트 & 제목 초기화
+    kdaChart.data.labels = [];
+    kdaChart.data.datasets = [];
+    kdaChart.update();
+    document.getElementById('compareTitle').textContent = '선수 두 명을 선택하세요';
+
+    // ✅ 다시 나타나는 효과 적용
+    canvas.style.opacity = '1';
+    canvas.style.transform = 'scale(1)';
+  }, 300);
+}
+
+
+    function toggleSelection(row, name) {
+      const selected = document.querySelectorAll('tr.selected');
+      if (!row.classList.contains('selected') && selected.length >= 5) {
+        alert('5명까지만 선택할 수 있습니다.');
+        return;
+      }
+      row.classList.toggle('selected');
+      updateChart();
+    }
+
+    function updateChart() {
+      const selectedRows = document.querySelectorAll('tr.selected');
+      const title = document.getElementById('compareTitle');
+
+      if (selectedRows.length === 0) {
+        kdaChart.data.labels = [];
+        kdaChart.data.datasets = [];
+        title.textContent = '선수 두 명을 선택하세요';
+        kdaChart.update();
+        return;
+      }
+
+      const labels = ['킬', '데스', '어시스트'];
+      const datasets = [];
+
+      selectedRows.forEach(row => {
+        const name = row.cells[0].textContent;
+        const player = playerStats[name];
+        datasets.push({
+          label: name,
+          data: [player.kills, player.deaths, player.assists],
+          backgroundColor: getRandomColor()
+        });
+      });
+
+      title.textContent = selectedRows.length + '명 비교 중';
+      kdaChart.data.labels = labels;
+      kdaChart.data.datasets = datasets;
+      kdaChart.update();
+    }
+
+    function getRandomColor() {
+      const r = Math.floor(Math.random() * 200 + 50);
+      const g = Math.floor(Math.random() * 200 + 50);
+      const b = Math.floor(Math.random() * 200 + 50);
+      return `rgba(${r}, ${g}, ${b}, 0.6)`;
+    }
+    
+
+const kdaChart = new Chart(document.getElementById('kdaChart'), {
+  type: 'bar',
+  data: {
+    labels: [],
+    datasets: []
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    animation: {
+      duration: 1500,
+      easing: 'easeOutBack',
+      delay(ctx) {
+        return ctx.dataIndex * 200;  // 순차적
+        // 또는 Math.random() * 500; // 폭발형
+      }
+    },
+    elements: {
+      bar: {
+        borderRadius: 8,
+        hoverBackgroundColor: 'rgba(255, 235, 59, 0.8)',
+        hoverBorderWidth: 2
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: { color: '#f1c40f' },
+        grid: { color: '#333' }
+      },
+      y: {
+        ticks: { color: '#f1c40f' },
+        grid: { color: '#333' }
+      }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor: '#1e1e1e',
+        titleColor: '#f1c40f',
+        bodyColor: '#fff',
+        borderColor: '#f1c40f',
+        borderWidth: 1
+      },
+      legend: {
+        labels: {
+          color: '#f1c40f'
+        }
+      }
+    }
+  }
+});
+
+    // 초기화 시 탑 포지션 표시
+    window.addEventListener('DOMContentLoaded', () => {
+  changePosition();
+    });
+  </script>
+<div id="chat-container">
+    <h2>실시간 채팅</h2>
+    <div id="chatArea"></div>
+    <div style="display: flex; margin-top: auto;">
+        <input type="text" id="usernameInput" placeholder="이름" style="width: 80px; margin-right: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="text" id="messageInput" placeholder="여기에 메시지를 입력하세요...">
+        <button id="sendButton">보내기</button>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+
+<script type="text/javascript">
+    // 1. 필요한 것들을 컴퓨터에게 알려줘요.
+    const chatArea = document.getElementById('chatArea');          // 채팅 내용이 보이는 곳
+    const usernameInput = document.getElementById('usernameInput'); // 사용자 이름 입력하는 곳
+    const messageInput = document.getElementById('messageInput'); // 메시지 입력하는 곳
+    const sendButton = document.getElementById('sendButton');     // 보내기 버튼
+
+    // --- 추가된 부분: 로컬 스토리지 관련 함수 ---
+    // 로컬 스토리지에 이름 저장
+    function saveUsername(username) {
+        localStorage.setItem('chatUsername', username);
+    }
+
+    // 로컬 스토리지에서 이름 불러오기
+    function loadUsername() {
+        return localStorage.getItem('chatUsername');
+    }
+
+    // 로컬 스토리지에 채팅 메시지 저장
+    function saveChatMessages(messages) {
+        try {
+            localStorage.setItem('chatHistory', JSON.stringify(messages));
+            // 스크롤 위치 저장 (선택 사항)
+            localStorage.setItem('chatScrollTop', chatArea.scrollTop);
+        } catch (e) {
+            console.error("채팅 기록 저장 실패:", e);
+        }
+    }
+
+    // 로컬 스토리지에서 채팅 메시지 불러오기
+    function loadChatMessages() {
+        try {
+            const history = localStorage.getItem('chatHistory');
+            return history ? JSON.parse(history) : [];
+        } catch (e) {
+            console.error("채팅 기록 불러오기 실패:", e);
+            return [];
+        }
+    }
+
+    // 로컬 스토리지에서 스크롤 위치 불러오기
+    function loadChatScrollTop() {
+        const scrollTop = localStorage.getItem('chatScrollTop');
+        return scrollTop ? parseInt(scrollTop, 10) : null;
+    }
+    // --- 추가된 부분 끝 ---
+
+    // 2. 서버에 연결할 Socket.IO를 만들어요.
+    // 현재 페이지의 도메인과 포트로 자동 연결됩니다.
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // --- 추가된 부분: 페이지 로드 시 초기화 ---
+    window.onload = function() {
+        // 1. 저장된 사용자 이름 불러와서 input에 채우기
+        const savedName = loadUsername();
+        if (savedName) {
+            usernameInput.value = savedName;
+        } else {
+            // 처음 방문 시 또는 저장된 이름이 없을 시 '익명'을 기본값으로
+            usernameInput.value = '익명';
+        }
+
+        // 2. 저장된 채팅 메시지 불러와서 chatArea에 표시
+        const savedMessages = loadChatMessages();
+        savedMessages.forEach(msg => {
+            // 메시지 객체는 { username: '이름', message: '내용' } 형태여야 함
+            const p = document.createElement('p');
+            if (msg.username === usernameInput.value.trim()) {
+                p.classList.add('me-message');
+            } else {
+                p.classList.add('other-message');
+            }
+            p.textContent = (msg.username ? msg.username + ': ' : '') + msg.message;
+            chatArea.appendChild(p);
+        });
+
+        // 3. 저장된 스크롤 위치로 이동 (없으면 가장 아래로)
+        const savedScrollTop = loadChatScrollTop();
+        if (savedScrollTop !== null) {
+            chatArea.scrollTop = savedScrollTop;
+        } else {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    };
+    // --- 추가된 부분 끝 ---
+
+
+    // 3. 서버와 연결이 잘 되었을 때 (Socket.IO 'connect' 이벤트)
+    socket.on('connect', function() {
+        console.log('서버랑 연결되었어요! 이제 채팅할 수 있어요.');
+        // 'status' 이벤트는 서버에서 보낼 때만 받습니다.
+        // chatArea.innerHTML += '<p class="status-message"><strong>[알림] 서버에 연결되었습니다.</strong></p>';
+    });
+
+    // 4. 서버로부터 메시지가 도착했을 때 (Socket.IO 'message' 이벤트)
+    socket.on('message', function(data) {
+        const p = document.createElement('p');
+
+        // 사용자 이름 가져오기
+        const myName = usernameInput.value.trim();
+
+        // 내 메시지인지 확인해서 스타일 다르게 적용
+        if (data.username === myName) {
+            p.classList.add('me-message');
+        } else {
+            p.classList.add('other-message');
+        }
+
+        // 메시지 내용 설정
+        p.textContent = (data.username ? data.username + ': ' : '') + data.message;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        // --- 추가된 부분: 받은 메시지 로컬 스토리지에 저장 ---
+        let currentMessages = loadChatMessages();
+        currentMessages.push({ username: data.username, message: data.message });
+        saveChatMessages(currentMessages);
+        // --- 추가된 부분 끝 ---
+    });
+
+
+    // 5. 서버로부터 상태 메시지가 도착했을 때 (Socket.IO 'status' 이벤트)
+    socket.on('status', function(data) {
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = data.msg;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 6. 서버와 연결이 끊겼을 때 (Socket.IO 'disconnect' 이벤트)
+    socket.on('disconnect', function() {
+        console.log('서버랑 연결이 끊겼어요.');
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[알림] 서버와 연결이 끊겼습니다.';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        // --- 추가된 부분: 연결이 끊겼을 때 재연결 시도 ---
+        console.log("3초 후 Socket.IO 재연결 시도...");
+        setTimeout(() => {
+            // io.connect를 다시 호출하면 Socket.IO가 재연결을 시도합니다.
+            // 이미 socket 객체가 있으므로 socket.connect()를 사용할 수도 있습니다.
+            socket.connect();
+        }, 3000);
+        // --- 추가된 부분 끝 ---
+    });
+
+    // 7. 문제가 생겼을 때 (Socket.IO 'error' 이벤트 - 잘 발생하진 않음)
+    socket.on('error', function(err) {
+        console.error('웹소켓 오류 발생:', err);
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[오류] 문제가 발생했습니다!';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 8. 메시지 보내기 버튼을 눌렀을 때
+    sendButton.onclick = function() {
+        sendMessage();
+    };
+
+    // 9. 메시지 입력 칸에서 엔터 키를 눌렀을 때
+    messageInput.onkeypress = function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
+    // 10. 메시지를 실제로 보내는 함수
+    function sendMessage() {
+        const username = usernameInput.value.trim(); // 사용자 이름 가져오기
+        const message = messageInput.value.trim();  // 입력 칸에 있는 메시지를 가져와요.
+
+        if (username === '') {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+
+        if (message !== '') { // 메시지가 비어있지 않다면
+            // Socket.IO는 emit을 사용하여 이벤트를 보냅니다.
+            // 서버의 'message' 핸들러로 'message' 이벤트와 함께 데이터를 보냅니다.
+            socket.emit('message', { username: username, message: message });
+            messageInput.value = ''; // 메시지를 보낸 후 입력 칸을 비워요.
+
+            // --- 추가된 부분: 보낸 메시지 로컬 스토리지에 저장 ---
+            // 서버로부터 메시지를 다시 받아 화면에 그리는 방식이라면 이 부분은 생략 가능
+            // 하지만 즉각적인 사용자 피드백을 위해 클라이언트에서 먼저 추가하는 것이 일반적
+            let currentMessages = loadChatMessages();
+            currentMessages.push({ username: username, message: message });
+            saveChatMessages(currentMessages);
+            // --- 추가된 부분 끝 ---
+
+            // --- 추가된 부분: 이름도 로컬 스토리지에 저장 ---
+            saveUsername(username);
+            // --- 추가된 부분 끝 ---
+        }
+    }
+</script>
+</body>
+</html>

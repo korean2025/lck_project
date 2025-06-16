@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ post.title }}</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-jp.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: #121212;
+      color: #f0f0f0;
+      background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background-color: #181818;
+      border-radius: 14px;
+      padding: 30px;
+      box-shadow: 0 0 30px rgba(255, 235, 59, 0.1);
+      max-width: 850px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #ffeb3b;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .post-meta {
+      font-size: 0.9em;
+      color: #bbb;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    .post-content {
+      line-height: 1.7;
+      font-size: 1.05em;
+      color: #e0e0e0;
+      white-space: pre-wrap;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #ffeb3b;
+      margin-top: 40px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #2b2b2b;
+      color: #f0f0f0;
+      font-size: 1em;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      transition: border 0.3s, background-color 0.3s;
+    }
+
+    textarea:focus {
+      border-color: #ffeb3b;
+      background-color: #2e2e2e;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #ffeb3b;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #fdd835;
+      transform: translateY(-2px);
+    }
+
+    .comments {
+      margin-top: 30px;
+    }
+
+    .comment {
+      background-color: #2a2a2a;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #ffeb3b;
+    }
+
+    .comment p {
+      margin: 5px 0;
+      color: #e0e0e0;
+    }
+
+    .comment strong {
+      color: #ffeb3b;
+    }
+
+    .actions {
+      text-align: right;
+      margin-top: 30px;
+    }
+
+    .actions a,
+    .actions button {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s, transform 0.2s;
+      margin-left: 10px;
+    }
+
+    .edit-btn {
+      background-color: #ffeb3b;
+      color: #000;
+    }
+
+    .edit-btn:hover {
+      background-color: #fdd835;
+      transform: translateY(-2px);
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .back-btn {
+      display: block;
+      margin-top: 40px;
+      text-align: center;
+      padding: 12px;
+      background-color: #444;
+      color: #f0f0f0;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .back-btn:hover {
+      background-color: #555;
+      transform: translateY(-2px);
+    }
+
+    form {
+      margin-top: 10px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      background-color: #1e1e1e;
+      padding: 20px 0;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    nav a {
+      color: #f1c40f;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      text-shadow: 0 0 10px #f1c40f;
+    }
+    /* 채팅창 스타일 */
+    #chat-container {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 320px;
+      height: 100%;
+      background: linear-gradient(to bottom, #1e1e1e, #121212);
+      border-left: 1px solid rgba(255, 235, 59, 0.1);
+      box-shadow: -4px 0 20px rgba(255, 235, 59, 0.15);
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      box-sizing: border-box;
+      z-index: 1000;
+      animation: slideInRight 0.7s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    #chat-container h2 {
+      color: #f1c40f;
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 20px;
+      text-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+    }
+
+    #chatArea {
+      flex-grow: 1;
+      border: 1px solid #444;
+      padding: 10px;
+      overflow-y: auto;
+      background-color: #1c1c1c;
+      margin-bottom: 10px;
+      color: #ddd;
+      font-size: 14px;
+      border-radius: 6px;
+      box-shadow: inset 0 0 5px rgba(255, 235, 59, 0.05);
+    }
+
+    #chatArea p {
+      margin: 6px 0;
+    }
+
+    #chatArea p strong {
+      color: #f1c40f;
+    }
+
+    #usernameInput,
+    #messageInput {
+      padding: 10px;
+      border: 1px solid #444;
+      background-color: #1c1c1c;
+      color: white;
+      border-radius: 5px;
+      font-size: 14px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    #usernameInput {
+      width: 60px;
+      padding: 6px 8px;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    #messageInput {
+      width: calc(100% - 130px); /* username + 버튼 공간 고려 */
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    #usernameInput:focus,
+    #messageInput:focus {
+      border-color: #f1c40f;
+      outline: none;
+      box-shadow: 0 0 8px rgba(255, 235, 59, 0.2);
+    }
+
+    #sendButton {
+      width: 60px;
+      padding: 8px 0;
+      font-size: 13px;
+      background: linear-gradient(135deg, #f1c40f, #ffeb3b);
+      color: black;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+    }
+
+    #sendButton:hover {
+      background: linear-gradient(135deg, #fff176, #fbc02d);
+      transform: translateY(-1px);
+      box-shadow: 0 0 12px rgba(255, 235, 59, 0.6);
+    }
+    .me-message {
+      background-color: #f1c40f;
+      color: #000;
+      align-self: flex-end;
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 18px 18px 4px 18px;
+      margin: 6px 0;
+      position: relative;
+      word-break: break-word;
+    }
+
+    .me-message::after {
+      content: "";
+      position: absolute;
+      right: -8px;
+      top: 12px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid #f1c40f;
+    }
+
+    .other-message {
+      background-color: #2c2c2c;
+      color: #f0f0f0;
+      align-self: flex-start;
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 18px 18px 18px 4px;
+      margin: 6px 0;
+      position: relative;
+      word-break: break-word;
+    }
+
+    .other-message::after {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 12px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid #2c2c2c;
+    }
+
+    .side-nav {
+      position: fixed;
+
+      left: 20px;
+      transform: translateY(15%);
+      width: 70px;
+      padding: 15px 10px;
+      background: rgba(0, 0, 0, 0.6); /* 어두운 반투명 배경 */
+      border: 1px solid rgba(241, 196, 15, 0.2); /* 노란 테두리 */
+      border-radius: 30px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.1); /* 은은한 네온 glow */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      z-index: 1000;
+    }
+
+
+    .side-nav a {
+      position: relative;
+      display: block;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      overflow: visible;
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .side-nav a:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+    }
+
+    .side-nav img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 툴팁 (오른쪽 위치) */
+    .tooltip {
+      position: absolute;
+      left: 60px;
+      top: 50%;
+      transform: translateY(-50%) scale(0.8);
+      background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+      color: #ffeb3b;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 0 0 transparent;
+      transition:
+        opacity 0.4s ease,
+        transform 0.4s ease,
+        box-shadow 0.4s ease;
+      z-index: 999;
+    }
+
+    /* 등장 애니메이션 효과 */
+    .side-nav a:hover .tooltip {
+      opacity: 1;
+      transform: translateY(-50%) translateX(8px) scale(1);
+      box-shadow: 0 0 10px rgba(255, 235, 59, 0.6),
+                  0 0 20px rgba(255, 235, 59, 0.2);
+    }
+    input[name="author"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #2a2a2a;
+      color: #f0f0f0;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+
+    input[name="author"]:focus {
+      border-color: #ffeb3b;
+      box-shadow: 0 0 8px rgba(255, 235, 59, 0.3);
+      outline: none;
+    }
+
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/">홈</a>
+    <a href="/player_comparison">선수비교</a>
+    <a href="/Simulator">시뮬레이터</a>
+    <a href="/board">게시판</a>
+    <a href="https://esports.op.gg/?hl=ko_KR" target="_blank">Esports.op.gg</a>
+    <a href="https://www.fow.lol/" target="_blank">FOW.KR</a>
+  </nav>
+  <div class="side-nav">
+    <a href="/bnk_fearx">
+      <img src="{{ url_for('static', filename='images/BNK FEARX.png') }}" alt="BNK FEARX" />
+      <span class="tooltip">BNK FEARX</span>
+    </a>
+
+    <a href="/dn_freecs">
+      <img src="{{ url_for('static', filename='images/DN freecs.png') }}" alt="DN freecs" />
+      <span class="tooltip">DN freecs</span>
+    </a>
+
+    <a href="/dplus_kia">
+      <img src="{{ url_for('static', filename='images/Dplus KIA.png') }}" alt="Dplus KIA" />
+      <span class="tooltip">Dplus KIA</span>
+    </a>
+
+    <a href="/hanwha_life_esports">
+      <img src="{{ url_for('static', filename='images/Hanwha Life Esports.png') }}" alt="Hanwha Life Esports" />
+      <span class="tooltip">Hanwha Life Esports</span>
+    </a>
+
+    <a href="/gen_g">
+      <img src="{{ url_for('static', filename='images/Gen.G.png') }}" alt="Gen.G" />
+      <span class="tooltip">Gen.G</span>
+    </a>
+
+    <a href="/drx">
+      <img src="{{ url_for('static', filename='images/DRX.png') }}" alt="DRX" />
+      <span class="tooltip">DRX</span>
+    </a>
+
+    <a href="/kt_rolster">
+      <img src="{{ url_for('static', filename='images/kt rolster.png') }}" alt="kt rolster" />
+      <span class="tooltip">KT Rolster</span>
+    </a>
+
+    <a href="/oksavingsbank_brion">
+      <img src="{{ url_for('static', filename='images/OKSavingsBank BRION.png') }}" alt="BRION" />
+      <span class="tooltip">BRION</span>
+    </a>
+
+    <a href="/nongshim_redforce">
+      <img src="{{ url_for('static', filename='images/Nongshim RedForce.png') }}" alt="Nongshim RedForce" />
+      <span class="tooltip">Nongshim RedForce</span>
+    </a>
+
+    <a href="/T1">
+      <img src="{{ url_for('static', filename='images/T1.png') }}" alt="T1" />
+      <span class="tooltip">T1</span>
+    </a>
+  </div>
+
+  <div class="container">
+    <h1>{{ post.title }}</h1>
+    <div class="post-meta">
+      <p>작성자: {{ post.author or '익명' }}</p>
+      <p>작성일: {{ post.date_posted.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+
+    <div class="post-content">
+      {{ post.content }}
+    </div>
+
+    <h2>댓글 작성</h2>
+    <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST" id="commentForm">
+      <input type="text" name="author" placeholder="아이디 입력 (선택사항)" id="commentAuthor">
+      <textarea name="content" placeholder="댓글을 입력하세요..." required></textarea>
+      <button type="submit">댓글 작성</button>
+    </form>
+
+    <div class="comments">
+      {% for comment in post.comments|sort(attribute='date_posted', reverse=True) %}
+        <div class="comment">
+          <p><strong>{{ comment.author or '익명' }}</strong> ({{ comment.date_posted.strftime('%Y-%m-%d %H:%M') }})</p>
+          <p>{{ comment.content }}</p>
+        </div>
+      {% endfor %}
+    </div>
+<!--
+    <div class="actions">
+      <a href="{{ url_for('update_post', post_id=post.id) }}" class="edit-btn">수정</a>
+      <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
+        <button type="submit" class="delete-btn" onclick="return confirm('정말로 이 게시글을 삭제하시겠습니까?');">삭제</button>
+      </form>
+    </div>
+  -->
+    <a href="{{ url_for('board') }}" class="back-btn">목록으로 돌아가기</a>
+  </div>
+
+  <div id="chat-container">
+    <h2>실시간 채팅</h2>
+    <div id="chatArea"></div>
+    <div style="display: flex; margin-top: auto;">
+      <input type="text" id="usernameInput" placeholder="이름" style="width: 80px; margin-right: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      <input type="text" id="messageInput" placeholder="여기에 메시지를 입력하세요...">
+      <button id="sendButton">보내기</button>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+
+  <script type="text/javascript">
+    // 1. 필요한 것들을 컴퓨터에게 알려줘요.
+    const chatArea = document.getElementById('chatArea');
+    const usernameInput = document.getElementById('usernameInput');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const commentAuthorInput = document.getElementById('commentAuthor'); // 댓글 아이디 입력 필드
+
+    // --- 로컬 스토리지 관련 함수 ---
+    function saveUsername(username) {
+      localStorage.setItem('chatUsername', username);
+    }
+
+    function loadUsername() {
+      return localStorage.getItem('chatUsername');
+    }
+
+    function saveChatMessages(messages) {
+      try {
+        localStorage.setItem('chatHistory', JSON.stringify(messages));
+        localStorage.setItem('chatScrollTop', chatArea.scrollTop);
+      } catch (e) {
+        console.error("채팅 기록 저장 실패:", e);
+      }
+    }
+
+    function loadChatMessages() {
+      try {
+        const history = localStorage.getItem('chatHistory');
+        return history ? JSON.parse(history) : [];
+      } catch (e) {
+        console.error("채팅 기록 불러오기 실패:", e);
+        return [];
+      }
+    }
+
+    function loadChatScrollTop() {
+      const scrollTop = localStorage.getItem('chatScrollTop');
+      return scrollTop ? parseInt(scrollTop, 10) : null;
+    }
+
+    // --- 채팅 메시지 화면에 렌더링하는 함수 ---
+    function renderChatMessage(message) {
+        const p = document.createElement('p');
+        // 사용자 이름 가져오기
+        const myName = usernameInput.value.trim();
+
+        // 내 메시지인지 확인해서 스타일 다르게 적용
+        if (message.username === myName) {
+            p.classList.add('me-message');
+        } else {
+            p.classList.add('other-message');
+        }
+        p.textContent = (message.username ? message.username + ': ' : '') + message.message;
+        chatArea.appendChild(p);
+    }
+
+
+    // 2. 서버에 연결할 Socket.IO를 만들어요.
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // --- 페이지 로드 시 모든 초기화 로직 (댓글 닉네임 + 채팅) ---
+    window.onload = function() {
+      // 1. 댓글 닉네임 자동 입력 로직
+      const savedCommentAuthor = localStorage.getItem('commentAuthor');
+      if (savedCommentAuthor) {
+        commentAuthorInput.value = savedCommentAuthor;
+      } else {
+        commentAuthorInput.value = '익명';
+      }
+
+      // 2. 채팅 사용자 이름 불러와서 input에 채우기
+      const savedChatUsername = loadUsername();
+      if (savedChatUsername) {
+        usernameInput.value = savedChatUsername;
+      } else {
+        usernameInput.value = '익명';
+      }
+
+      // 3. 저장된 채팅 메시지 불러와서 chatArea에 표시
+      const savedChatMessages = loadChatMessages();
+      savedChatMessages.forEach(msg => {
+        renderChatMessage(msg); // 통합된 렌더링 함수 사용
+      });
+
+      // 4. 저장된 채팅 스크롤 위치로 이동 (없으면 가장 아래로)
+      const savedChatScrollTop = loadChatScrollTop();
+      if (savedChatScrollTop !== null) {
+        chatArea.scrollTop = savedChatScrollTop;
+      } else {
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }
+
+      // 5. Socket.IO 연결 시작
+      socket.connect(); // 명시적으로 연결 시작
+      console.log('Socket.IO 연결 초기화');
+    };
+
+    // --- Socket.IO 이벤트 핸들러 ---
+    socket.on('connect', function() {
+      console.log('서버랑 연결되었어요! 이제 채팅할 수 있어요.');
+    });
+
+    socket.on('message', function(data) {
+      renderChatMessage(data); // 통합된 렌더링 함수 사용
+      chatArea.scrollTop = chatArea.scrollHeight;
+
+      // 받은 메시지 로컬 스토리지에 저장
+      let currentMessages = loadChatMessages();
+      currentMessages.push({ username: data.username, message: data.message });
+      saveChatMessages(currentMessages);
+    });
+
+    socket.on('status', function(data) {
+      const p = document.createElement('p');
+      p.classList.add('status-message');
+      p.textContent = data.msg;
+      chatArea.appendChild(p);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    socket.on('disconnect', function() {
+      console.log('서버랑 연결이 끊겼어요.');
+      const p = document.createElement('p');
+      p.classList.add('status-message');
+      p.textContent = '[알림] 서버와 연결이 끊겼습니다.';
+      chatArea.appendChild(p);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      console.log("3초 후 Socket.IO 재연결 시도...");
+      setTimeout(() => {
+        socket.connect();
+      }, 3000);
+    });
+
+    socket.on('error', function(err) {
+      console.error('웹소켓 오류 발생:', err);
+      const p = document.createElement('p');
+      p.classList.add('status-message');
+      p.textContent = '[오류] 문제가 발생했습니다!';
+      chatArea.appendChild(p);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // --- 댓글 폼 제출 시 아이디 로컬 스토리지에 저장 ---
+    document.getElementById('commentForm').addEventListener('submit', function() {
+      const authorInput = document.getElementById('commentAuthor');
+      if (authorInput.value && authorInput.value !== '익명') {
+        localStorage.setItem('commentAuthor', authorInput.value);
+      } else if (authorInput.value === '익명') {
+        localStorage.removeItem('commentAuthor');
+      }
+    });
+
+    // --- 메시지 보내기 로직 ---
+    sendButton.onclick = function() {
+      sendMessage();
+    };
+
+    messageInput.onkeypress = function(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    };
+
+    function sendMessage() {
+      const username = usernameInput.value.trim();
+      const message = messageInput.value.trim();
+
+      if (username === '') {
+        alert('이름을 입력해주세요.');
+        return;
+      }
+
+      if (message !== '') {
+        socket.emit('message', { username: username, message: message });
+        messageInput.value = '';
+
+        // 보낸 메시지 로컬 스토리지에 저장
+        let currentMessages = loadChatMessages();
+        currentMessages.push({ username: username, message: message });
+        saveChatMessages(currentMessages);
+
+        saveUsername(username); // 이름도 로컬 스토리지에 저장
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>새 글 작성</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-jp.css" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 20px;
+      padding-right: 350px; /* 채팅창 공간 확보 */
+      background-color: #121212;
+      color: #f0f0f0;
+      background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: fadeInBody 0.8s ease-in-out;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      margin-right: 350px; /* 오른쪽 채팅창 고려 */
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(255, 255, 0, 0.15);
+      animation: slideUp 1s ease forwards;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffeb3b;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    form div {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #ffeb3b;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #333;
+      background-color: #2b2b2b;
+      color: #f0f0f0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border 0.3s, background-color 0.3s, transform 0.2s;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #ffeb3b;
+      background-color: #2e2e2e;
+      outline: none;
+      transform: scale(1.01);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .form-actions {
+      text-align: right;
+    }
+
+    button, .back-link {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    button {
+      background-color: #ffeb3b;
+      color: #000;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #fdd835;
+      transform: translateY(-2px);
+    }
+
+    .back-link {
+      margin-right: 10px;
+      background-color: #444;
+      color: #f0f0f0;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      background-color: #555;
+      transform: translateY(-2px);
+    }
+
+    /* 로딩 애니메이션 */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 5px solid #2e2e2e;
+      border-top: 5px solid #ffeb3b;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    nav {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  background-color: #1e1e1e;
+  padding: 20px 0;
+  border-radius: 10px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+nav a {
+  color: #f1c40f;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+nav a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px #f1c40f;
+}
+  .side-nav {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70px;
+  padding: 15px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(241, 196, 15, 0.2);
+  border-radius: 30px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  z-index: 1000;
+}
+
+
+.side-nav a {
+  position: relative;
+  display: block;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: visible;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.side-nav a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+}
+
+.side-nav img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 툴팁 (오른쪽 위치) */
+.tooltip {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.8);
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+  color: #ffeb3b;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 0 transparent;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+  z-index: 999;
+}
+
+/* 등장 애니메이션 효과 */
+.side-nav a:hover .tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(8px) scale(1);
+  box-shadow: 0 0 10px rgba(255, 235, 59, 0.6),
+              0 0 20px rgba(255, 235, 59, 0.2);
+}
+/* 채팅창 스타일 */
+#chat-container {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 320px;
+  height: 100%;
+  background: linear-gradient(to bottom, #1e1e1e, #121212);
+  border-left: 1px solid rgba(255, 235, 59, 0.1);
+  box-shadow: -4px 0 20px rgba(255, 235, 59, 0.15);
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+  z-index: 1000;
+  animation: slideInRight 0.7s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+#chat-container h2 {
+  color: #f1c40f;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 20px;
+  text-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+}
+
+#chatArea {
+  flex-grow: 1;
+  border: 1px solid #444;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #1c1c1c;
+  margin-bottom: 10px;
+  color: #ddd;
+  font-size: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 5px rgba(255, 235, 59, 0.05);
+}
+
+#chatArea p {
+  margin: 6px 0;
+}
+
+#chatArea p strong {
+  color: #f1c40f;
+}
+
+#usernameInput,
+#messageInput {
+  padding: 10px;
+  border: 1px solid #444;
+  background-color: #1c1c1c;
+  color: white;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+#usernameInput {
+  width: 60px;
+  padding: 6px 8px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+#messageInput {
+  width: calc(100% - 130px); /* username + 버튼 공간 고려 */
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+#usernameInput:focus,
+#messageInput:focus {
+  border-color: #f1c40f;
+  outline: none;
+  box-shadow: 0 0 8px rgba(255, 235, 59, 0.2);
+}
+
+#sendButton {
+  width: 60px;
+  padding: 8px 0;
+  font-size: 13px;
+  background: linear-gradient(135deg, #f1c40f, #ffeb3b);
+  color: black;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 235, 59, 0.4);
+}
+
+#sendButton:hover {
+  background: linear-gradient(135deg, #fff176, #fbc02d);
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(255, 235, 59, 0.6);
+}
+.me-message {
+  background-color: #f1c40f;
+  color: #000;
+  align-self: flex-end;
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
+  margin: 6px 0;
+  position: relative;
+  word-break: break-word;
+}
+
+.me-message::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid #f1c40f;
+}
+
+.other-message {
+  background-color: #2c2c2c;
+  color: #f0f0f0;
+  align-self: flex-start;
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 4px;
+  margin: 6px 0;
+  position: relative;
+  word-break: break-word;
+}
+
+.other-message::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid #2c2c2c;
+}
+  </style>
+</head>
+<body>
+ <nav>
+  <a href="/">홈</a>
+  <a href="/player_comparison">선수비교</a>
+  <a href="/Simulator">시뮬레이터</a>
+  <a href="/board">게시판</a>
+  <a href="https://esports.op.gg/?hl=ko_KR" target="_blank">Esports.op.gg</a>
+  <a href="https://www.fow.lol/" target="_blank">FOW.KR</a>
+</nav>
+<div class="side-nav">
+  <a href="/bnk_fearx">
+    <img src="{{ url_for('static', filename='images/BNK FEARX.png') }}" alt="BNK FEARX" />
+    <span class="tooltip">BNK FEARX</span>
+  </a>
+
+  <a href="/dn_freecs">
+    <img src="{{ url_for('static', filename='images/DN freecs.png') }}" alt="DN freecs" />
+    <span class="tooltip">DN freecs</span>
+  </a>
+
+  <a href="/dplus_kia">
+    <img src="{{ url_for('static', filename='images/Dplus KIA.png') }}" alt="Dplus KIA" />
+    <span class="tooltip">Dplus KIA</span>
+  </a>
+
+  <a href="/hanwha_life_esports">
+    <img src="{{ url_for('static', filename='images/Hanwha Life Esports.png') }}" alt="Hanwha Life Esports" />
+    <span class="tooltip">Hanwha Life Esports</span>
+  </a>
+
+  <a href="/gen_g">
+    <img src="{{ url_for('static', filename='images/Gen.G.png') }}" alt="Gen.G" />
+    <span class="tooltip">Gen.G</span>
+  </a>
+
+  <a href="/drx">
+    <img src="{{ url_for('static', filename='images/DRX.png') }}" alt="DRX" />
+    <span class="tooltip">DRX</span>
+  </a>
+
+  <a href="/kt_rolster">
+    <img src="{{ url_for('static', filename='images/kt rolster.png') }}" alt="kt rolster" />
+    <span class="tooltip">KT Rolster</span>
+  </a>
+
+  <a href="/oksavingsbank_brion">
+    <img src="{{ url_for('static', filename='images/OKSavingsBank BRION.png') }}" alt="BRION" />
+    <span class="tooltip">BRION</span>
+  </a>
+
+  <a href="/nongshim_redforce">
+    <img src="{{ url_for('static', filename='images/Nongshim RedForce.png') }}" alt="Nongshim RedForce" />
+    <span class="tooltip">Nongshim RedForce</span>
+  </a>
+
+  <a href="/T1">
+    <img src="{{ url_for('static', filename='images/T1.png') }}" alt="T1" />
+    <span class="tooltip">T1</span>
+  </a>
+</div>
+
+  <div class="container">
+    <div class="loading-overlay" id="loading">
+      <div class="loader"></div>
+    </div>
+
+    <h1>새 글 작성</h1>
+    <form method="POST" onsubmit="showLoading()">
+      <div>
+        <label for="title">제목:</label>
+        <input type="text" id="title" name="title" required />
+      </div>
+      <div>
+        <label for="author">작성자 (선택 사항):</label>
+        <input type="text" id="author" name="author" />
+      </div>
+      <div>
+        <label for="content">내용:</label>
+        <textarea id="content" name="content" required></textarea>
+      </div>
+      <div class="form-actions">
+        <a href="{{ url_for('board') }}" class="back-link">취소</a>
+        <button type="submit">작성 완료</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function showLoading() {
+      document.getElementById('loading').classList.add('active');
+    }
+  </script>
+<div id="chat-container">
+    <h2>실시간 채팅</h2>
+    <div id="chatArea"></div>
+    <div style="display: flex; margin-top: auto;">
+        <input type="text" id="usernameInput" placeholder="이름" style="width: 80px; margin-right: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="text" id="messageInput" placeholder="여기에 메시지를 입력하세요...">
+        <button id="sendButton">보내기</button>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+
+<script type="text/javascript">
+    // 1. 필요한 것들을 컴퓨터에게 알려줘요.
+    const chatArea = document.getElementById('chatArea');          // 채팅 내용이 보이는 곳
+    const usernameInput = document.getElementById('usernameInput'); // 사용자 이름 입력하는 곳
+    const messageInput = document.getElementById('messageInput'); // 메시지 입력하는 곳
+    const sendButton = document.getElementById('sendButton');     // 보내기 버튼
+
+    // --- 추가된 부분: 로컬 스토리지 관련 함수 ---
+    // 로컬 스토리지에 이름 저장
+    function saveUsername(username) {
+        localStorage.setItem('chatUsername', username);
+    }
+
+    // 로컬 스토리지에서 이름 불러오기
+    function loadUsername() {
+        return localStorage.getItem('chatUsername');
+    }
+
+    // 로컬 스토리지에 채팅 메시지 저장
+    function saveChatMessages(messages) {
+        try {
+            localStorage.setItem('chatHistory', JSON.stringify(messages));
+            // 스크롤 위치 저장 (선택 사항)
+            localStorage.setItem('chatScrollTop', chatArea.scrollTop);
+        } catch (e) {
+            console.error("채팅 기록 저장 실패:", e);
+        }
+    }
+
+    // 로컬 스토리지에서 채팅 메시지 불러오기
+    function loadChatMessages() {
+        try {
+            const history = localStorage.getItem('chatHistory');
+            return history ? JSON.parse(history) : [];
+        } catch (e) {
+            console.error("채팅 기록 불러오기 실패:", e);
+            return [];
+        }
+    }
+
+    // 로컬 스토리지에서 스크롤 위치 불러오기
+    function loadChatScrollTop() {
+        const scrollTop = localStorage.getItem('chatScrollTop');
+        return scrollTop ? parseInt(scrollTop, 10) : null;
+    }
+    // --- 추가된 부분 끝 ---
+
+    // 2. 서버에 연결할 Socket.IO를 만들어요.
+    // 현재 페이지의 도메인과 포트로 자동 연결됩니다.
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // --- 추가된 부분: 페이지 로드 시 초기화 ---
+    window.onload = function() {
+        // 1. 저장된 사용자 이름 불러와서 input에 채우기
+        const savedName = loadUsername();
+        if (savedName) {
+            usernameInput.value = savedName;
+        } else {
+            // 처음 방문 시 또는 저장된 이름이 없을 시 '익명'을 기본값으로
+            usernameInput.value = '익명';
+        }
+
+        // 2. 저장된 채팅 메시지 불러와서 chatArea에 표시
+        const savedMessages = loadChatMessages();
+        savedMessages.forEach(msg => {
+            // 메시지 객체는 { username: '이름', message: '내용' } 형태여야 함
+            const p = document.createElement('p');
+            if (msg.username === usernameInput.value.trim()) {
+                p.classList.add('me-message');
+            } else {
+                p.classList.add('other-message');
+            }
+            p.textContent = (msg.username ? msg.username + ': ' : '') + msg.message;
+            chatArea.appendChild(p);
+        });
+
+        // 3. 저장된 스크롤 위치로 이동 (없으면 가장 아래로)
+        const savedScrollTop = loadChatScrollTop();
+        if (savedScrollTop !== null) {
+            chatArea.scrollTop = savedScrollTop;
+        } else {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    };
+    // --- 추가된 부분 끝 ---
+
+
+    // 3. 서버와 연결이 잘 되었을 때 (Socket.IO 'connect' 이벤트)
+    socket.on('connect', function() {
+        console.log('서버랑 연결되었어요! 이제 채팅할 수 있어요.');
+        // 'status' 이벤트는 서버에서 보낼 때만 받습니다.
+        // chatArea.innerHTML += '<p class="status-message"><strong>[알림] 서버에 연결되었습니다.</strong></p>';
+    });
+
+    // 4. 서버로부터 메시지가 도착했을 때 (Socket.IO 'message' 이벤트)
+    socket.on('message', function(data) {
+        const p = document.createElement('p');
+
+        // 사용자 이름 가져오기
+        const myName = usernameInput.value.trim();
+
+        // 내 메시지인지 확인해서 스타일 다르게 적용
+        if (data.username === myName) {
+            p.classList.add('me-message');
+        } else {
+            p.classList.add('other-message');
+        }
+
+        // 메시지 내용 설정
+        p.textContent = (data.username ? data.username + ': ' : '') + data.message;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        // --- 추가된 부분: 받은 메시지 로컬 스토리지에 저장 ---
+        let currentMessages = loadChatMessages();
+        currentMessages.push({ username: data.username, message: data.message });
+        saveChatMessages(currentMessages);
+        // --- 추가된 부분 끝 ---
+    });
+
+
+    // 5. 서버로부터 상태 메시지가 도착했을 때 (Socket.IO 'status' 이벤트)
+    socket.on('status', function(data) {
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = data.msg;
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 6. 서버와 연결이 끊겼을 때 (Socket.IO 'disconnect' 이벤트)
+    socket.on('disconnect', function() {
+        console.log('서버랑 연결이 끊겼어요.');
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[알림] 서버와 연결이 끊겼습니다.';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        // --- 추가된 부분: 연결이 끊겼을 때 재연결 시도 ---
+        console.log("3초 후 Socket.IO 재연결 시도...");
+        setTimeout(() => {
+            // io.connect를 다시 호출하면 Socket.IO가 재연결을 시도합니다.
+            // 이미 socket 객체가 있으므로 socket.connect()를 사용할 수도 있습니다.
+            socket.connect();
+        }, 3000);
+        // --- 추가된 부분 끝 ---
+    });
+
+    // 7. 문제가 생겼을 때 (Socket.IO 'error' 이벤트 - 잘 발생하진 않음)
+    socket.on('error', function(err) {
+        console.error('웹소켓 오류 발생:', err);
+        const p = document.createElement('p');
+        p.classList.add('status-message');
+        p.textContent = '[오류] 문제가 발생했습니다!';
+        chatArea.appendChild(p);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // 8. 메시지 보내기 버튼을 눌렀을 때
+    sendButton.onclick = function() {
+        sendMessage();
+    };
+
+    // 9. 메시지 입력 칸에서 엔터 키를 눌렀을 때
+    messageInput.onkeypress = function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    };
+
+    // 10. 메시지를 실제로 보내는 함수
+    function sendMessage() {
+        const username = usernameInput.value.trim(); // 사용자 이름 가져오기
+        const message = messageInput.value.trim();  // 입력 칸에 있는 메시지를 가져와요.
+
+        if (username === '') {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+
+        if (message !== '') { // 메시지가 비어있지 않다면
+            // Socket.IO는 emit을 사용하여 이벤트를 보냅니다.
+            // 서버의 'message' 핸들러로 'message' 이벤트와 함께 데이터를 보냅니다.
+            socket.emit('message', { username: username, message: message });
+            messageInput.value = ''; // 메시지를 보낸 후 입력 칸을 비워요.
+
+            // --- 추가된 부분: 보낸 메시지 로컬 스토리지에 저장 ---
+            // 서버로부터 메시지를 다시 받아 화면에 그리는 방식이라면 이 부분은 생략 가능
+            // 하지만 즉각적인 사용자 피드백을 위해 클라이언트에서 먼저 추가하는 것이 일반적
+            let currentMessages = loadChatMessages();
+            currentMessages.push({ username: username, message: message });
+            saveChatMessages(currentMessages);
+            // --- 추가된 부분 끝 ---
+
+            // --- 추가된 부분: 이름도 로컬 스토리지에 저장 ---
+            saveUsername(username);
+            // --- 추가된 부분 끝 ---
+        }
+    }
+</script>
+</body>
+</html>

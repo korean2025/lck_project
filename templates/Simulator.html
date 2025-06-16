@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>양 팀 승률 시뮬레이터</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #0a0a0a;
+      background-image: radial-gradient(#2c2c2c 1px, transparent 1px);
+      background-size: 26px 26px;
+      color: #f0f0f0;
+      font-family: 'Pretendard', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 35px;
+      padding: 15px 30px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(255, 240, 160, 0.1), rgba(255, 240, 160, 0.03));
+      border: 2px solid rgba(255, 240, 160, 0.12);
+      border-radius: 18px;
+      box-shadow: 0 0 10px rgba(255, 240, 160, 0.15), inset 0 0 4px rgba(255, 240, 160, 0.08), 0 4px 10px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 0 6px rgba(255, 240, 160, 0.4), 0 0 10px rgba(255, 255, 255, 0.04);
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+
+    .outer-box {
+      position: relative;
+      background: linear-gradient(135deg, #111 0%, #191919 100%);
+      border-radius: 30px;
+      padding: 30px;
+      margin-top: 10px;
+      box-shadow: 0 0 60px rgba(255, 204, 0, 0.15), 0 0 25px rgba(255, 204, 0, 0.08) inset;
+    }
+
+    .outer-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 30px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .layout {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      width: 100%;
+      max-width: 1800px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chart-container {
+      background: #1a1a1a;
+      border: 2px solid #ffcc00;
+      border-radius: 20px;
+      padding: 25px;
+      width: 360px;
+      height: 360px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 35px rgba(255, 204, 0, 0.2), inset 0 0 15px rgba(255, 204, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .chart-container:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 70px rgba(255, 204, 0, 0.4), inset 0 0 25px rgba(255, 204, 0, 0.1);
+    }
+
+    #result-chart {
+      width: 100%;
+      height: 100%;
+    }
+
+    .simulator {
+      background: linear-gradient(145deg, #1f1f1f, #141414);
+      border-radius: 20px;
+      padding: 25px;
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid #ffcc00;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 204, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .simulator:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 50px rgba(255, 204, 0, 0.5);
+    }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px 30px;
+    }
+
+    .slider-group {
+      background: #111;
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid #333;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+      position: relative;
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+
+    .slider-group:hover {
+      box-shadow: 0 0 18px rgba(255, 204, 0, 0.7);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      color: #ccc;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .slider-group label:hover {
+      color: #ffcc00;
+    }
+
+    .slider-group label:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #ffcc00;
+    }
+
+    .slider-value {
+      font-size: 13px;
+      color: #aaa;
+      text-align: right;
+    }
+
+    .winRateDisplay {
+      margin-top: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffcc00;
+      text-shadow: 0 0 6px rgba(255, 204, 0, 0.5);
+      text-align: center;
+    }
+  nav {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    background-color: #1e1e1e;
+    padding: 20px 0;
+    border-radius: 10px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 999;
+    animation: fadeInNav 1s ease-in-out;
+  }
+
+  @keyframes fadeInNav {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  nav a {
+    color: #f1c40f;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+
+  nav a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 10px #f1c40f;
+  }
+
+  </style>
+</head>
+<body>
+   <nav>
+  <a href="/">홈</a>
+  <a href="/player_comparison">선수비교</a>
+  <a href="/Simulator">시뮬레이터</a>
+  <a href="/board">게시판</a>
+  <a href="https://esports.op.gg/?hl=ko_KR" target="_blank">Esports.op.gg</a>
+  <a href="https://www.fow.lol/" target="_blank">FOW.KR</a>
+</nav>
+
+
+ <h1>⚔️ LCK 팀 승률 시뮬레이터 ⚔️</h1>
+
+
+  <div class="outer-box">
+    <div class="layout">
+      <div class="simulator" id="team1">
+        <h2>팀 1</h2>
+        <div class="slider-grid" id="inputs1"></div>
+        <div class="winRateDisplay" id="rate1">--%</div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="result-chart"></canvas>
+      </div>
+
+      <div class="simulator" id="team2">
+        <h2>팀 2</h2>
+        <div class="slider-grid" id="inputs2"></div>
+        <div class="winRateDisplay" id="rate2">--%</div>
+      </div>
+    </div>
+  </div>
+
+
+
+   <script>
+const stats = [
+  { id: "k", label: "⚔️ 킬 ", min: 0, max: 30, value: 10, tooltip: "팀 킬 수", unit: " 킬" }, 
+  { id: "d", label: "💀 데스", min: 0, max: 30, value: 10, tooltip: "팀 데스 수", unit: " 데스" },
+  { id: "kd", label: "📊 킬/데스 비율", min: 0, max: 5, value: 1.5, tooltip: "킬/데스 비율", unit: "" },
+  { id: "gpr", label: "💰 골드 점유율", min: 0, max: 100, value: 50, tooltip: "골드 점유율", unit: " %" },
+  { id: "gspd", label: "🚀 분당 골드 차이", min: -5, max: 5, value: 0, tooltip: "분당 골드 차이(%)", unit: " %" },
+  { id: "gd15", label: "💸 15분 골드 차이", min: -3000, max: 3000, value: 0, tooltip: "15분 골드 차이", unit: " 골드" },
+  { id: "fb", label: "🩸 퍼스트 블러드확률", min: 0, max: 100, value: 50, tooltip: "퍼스트 블러드 확률", unit: " %" },
+  { id: "ft", label: "🏯 퍼스트 타워 확률%", min: 0, max: 100, value: 50, tooltip: "퍼스트 타워 확률", unit: " %" },
+  { id: "f3t", label: "🏰 3타워 선취 확률", min: 0, max: 100, value: 50, tooltip: "3타워 선취 확률", unit: " %" },
+  { id: "fd", label: "📍 첫 드래곤 획득률%", min: 0, max: 100, value: 50, tooltip: "첫 드래곤 획득률", unit: " %" },
+  { id: "drg", label: "🐉 드래곤 점유율", min: 0, max: 100, value: 50, tooltip: "드래곤 점유율", unit: " %" },
+  { id: "eld", label: "🔥 장로 드래곤 점유율%", min: 0, max: 100, value: 50, tooltip: "장로 드래곤 점유율", unit: " %" },
+  { id: "fbn", label: "🔫 첫 바론 확률", min: 0, max: 100, value: 50, tooltip: "첫 바론 확률", unit: " %" },
+  { id: "bn", label: "🦑 바론 점유율", min: 0, max: 100, value: 50, tooltip: "바론 점유율", unit: " %" },
+  { id: "wpm", label: "👁️ 분당 와드 설치", min: 0, max: 10, value: 3, tooltip: "분당 와드 설치", unit: "" },
+];
+
+
+function calculateScore(teamId) {
+  const values = {};
+  stats.forEach(stat => {
+    const element = document.getElementById(`${stat.id}${teamId}`);
+    values[stat.id] = parseFloat(element?.value) || 0;
+  });
+
+  return (
+    0.03 * values.k +                       // K
+    -0.03 * values.d +                      // D
+    0.04 * values.kd * 20 +                 // KD (0~5 → 0~100)
+    0.03 * values.gpr +                     // GPR
+    0.03 * (values.gspd + 5) * 10 +         // GSPD (-5~5 → 0~100)
+    0.03 * ((values.gd15 + 3000) / 60) +    // GD15 (-3000~3000 → 0~100)
+    0.03 * values.fb +                      // FB%
+    0.03 * values.ft +                      // FT%
+    0.03 * values.f3t +                     // F3T%
+    0.03 * values.fd +                      // FD%
+    0.03 * values.drg +                     // DRG%
+    0.04 * values.eld +                     // ELD%
+    0.03 * values.fbn +                     // FBN%
+    0.03 * values.bn +                      // BN%
+    0.03 * values.wpm * 10                  // WPM (0~10 → 0~100)
+  );
+}
+
+    function updateChart(t1, t2) {
+      const total = t1 + t2;
+      const p1 = Math.round((t1 / total) * 100);
+      const p2 = 100 - p1;
+
+      document.getElementById("rate1").textContent = p1 + "%";
+      document.getElementById("rate2").textContent = p2 + "%";
+
+      if (window.chart) window.chart.destroy();
+      window.chart = new Chart(document.getElementById("result-chart"), {
+        type: "doughnut",
+        data: {
+          labels: ["팀 2","팀 1"],
+          datasets: [{
+            data: [p2, p1],
+            backgroundColor: ["#f44336","#4caf50"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: "60%",
+          plugins: {
+            legend: { display: true, position: "bottom" }
+          }
+        }
+      });
+    }
+
+    function updateBoth() {
+      const t1 = calculateScore("1");
+      const t2 = calculateScore("2");
+      updateChart(t1, t2);
+    }
+
+    window.onload = () => {
+      ["1", "2"].forEach(teamId => {
+        const container = document.getElementById(`inputs${teamId}`);
+        stats.forEach(stat => {
+          const div = document.createElement("div");
+          div.className = "slider-group";
+
+          const label = document.createElement("label");
+          label.textContent = stat.label;
+          label.setAttribute("for", `${stat.id}${teamId}`);
+          label.setAttribute("data-tooltip", stat.tooltip);
+
+          const input = document.createElement("input");
+          input.type = "range";
+          input.id = `${stat.id}${teamId}`;
+          input.min = stat.min;
+          input.max = stat.max;
+          input.value = stat.value;
+
+          const valueDisplay = document.createElement("div");
+          valueDisplay.style.marginTop = "5px";
+          valueDisplay.style.fontSize = "14px";
+          valueDisplay.style.color = "#aaa";
+          valueDisplay.innerHTML = `<span id="${stat.id}val${teamId}">${stat.value}${stat.unit}</span>`;
+
+          input.addEventListener("input", () => {
+            document.getElementById(`${stat.id}val${teamId}`).textContent = input.value + stat.unit;
+            updateBoth();
+          });
+
+          div.appendChild(label);
+          div.appendChild(input);
+          div.appendChild(valueDisplay);
+          container.appendChild(div);
+        });
+      });
+      updateBoth();
+    };
+
+  </script>
+
+</body>
+</html>
